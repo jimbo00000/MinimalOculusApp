@@ -1,0 +1,3 @@
+MinimalOculusApp
+
+An adaptation of the tutorial at https://developer.oculusvr.com/wiki/index.php?title=Minimal_Oculus_Application for portability using CMake.
