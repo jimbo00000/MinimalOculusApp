@@ -20,7 +20,26 @@ IF( WIN32 )
         libovrd.lib
         Winmm.lib
         )
-        
+
+ELSEIF( APPLE )
+    SET( LIBS_HOME "~/Development/" )
+    
+    SET( OCULUSSDK_ROOT "${LIBS_HOME}/Oculus/OculusSDK" )
+    INCLUDE_DIRECTORIES( "${OCULUSSDK_ROOT}/LibOVR/Include" )
+    INCLUDE_DIRECTORIES( "${OCULUSSDK_ROOT}/LibOVR/Src" )
+    LINK_DIRECTORIES   ( "${OCULUSSDK_ROOT}/LibOVR/Lib/MacOS/Debug/" )
+    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
+    FIND_LIBRARY(IOKIT_LIBRARY IOKit)
+
+    MARK_AS_ADVANCED (COCOA_LIBRARY
+                      IOKIT_LIBRARY
+                      )
+    # Todo - build OVR with RTTI suppo
+    SET(CMAKE_CXX_FLAGS "-fno-rtti")
+    
+    SET( PLATFORM_LIBS
+        libovr.a ${COCOA_LIBRARY} ${IOKIT_LIBRARY}  
+        )     
 ELSEIF( UNIX )
     ADD_DEFINITIONS( -D_LINUX )
     SET( LIBS_HOME "~/lib" )
