@@ -51,7 +51,8 @@ INCLUDE_DIRECTORIES("src")
 
 ADD_EXECUTABLE( ${PROJECT_NAME}
     src/minimal_oculus_app.cpp
-)
+    )
 
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
-    ${PLATFORM_LIBS} )
+    ${PLATFORM_LIBS}
+    )
