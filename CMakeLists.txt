@@ -17,19 +17,21 @@ IF( WIN32 )
     LINK_DIRECTORIES   ( "${OCULUSSDK_ROOT}/LibOVR/Lib/Win32" )
 
     SET( PLATFORM_LIBS
-        libovrd.lib Winmm.lib
+        libovrd.lib
+        Winmm.lib
         )
         
 ELSEIF( UNIX )
-    SET( LIBS_HOME "/home/jim/" )
+    ADD_DEFINITIONS( -D_LINUX )
+    SET( LIBS_HOME "~/lib" )
     
-    SET( OCULUSSDK_ROOT "${LIBS_HOME}/OVR/OculusSDK" )
+    SET( OCULUSSDK_ROOT "${LIBS_HOME}/OculusSDK" )
     INCLUDE_DIRECTORIES( "${OCULUSSDK_ROOT}/LibOVR/Include" )
     INCLUDE_DIRECTORIES( "${OCULUSSDK_ROOT}/LibOVR/Src" )
     LINK_DIRECTORIES   ( "${OCULUSSDK_ROOT}/LibOVR/Lib/Linux/Debug/x86_64" )
     
     SET( PLATFORM_LIBS
-        libovr.a
+        -lovr
         -pthread
         -ludev
         )
