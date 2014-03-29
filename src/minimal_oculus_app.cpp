@@ -2,6 +2,7 @@
 // https://developer.oculusvr.com/wiki/index.php?title=Minimal_Oculus_Application&status=1
 
 #include <iostream>
+#include <iomanip>
 #ifdef _WIN32
 #  include <conio.h>
 #endif
@@ -107,9 +108,11 @@ void Output()
         float yaw, pitch, roll;
         quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
 
-        cout << " Yaw: " << RadToDegree(yaw) << 
-            ", Pitch: " << RadToDegree(pitch) << 
-            ", Roll: " << RadToDegree(roll) << endl;
+        cout
+            << std::setprecision(2)
+            << " Yaw " << RadToDegree(yaw)
+            << ",  Pitch " << RadToDegree(pitch)
+            << ",  Roll " << RadToDegree(roll) << endl;
 
 #ifdef _WIN32
         Sleep(50);
