@@ -5,125 +5,66 @@
 #include <iomanip>
 #ifdef _WIN32
 #  include <conio.h>
+#  include <windows.h>
 #endif
-#include "OVR.h"
 
-using namespace std;
+#include "OVR_CAPI.h"
+#include "../Src/Kernel/OVR_Math.h" ///@todo Expose GetEulerAngles function from CAPI
+
 using namespace OVR;
 
-Ptr<DeviceManager>	pManager;
-Ptr<HMDDevice>		pHMD;
-Ptr<SensorDevice>	pSensor;
-SensorFusion		FusionResult;
-HMDInfo			Info;
-bool			InfoLoaded;
-
-
-void Init()
+void main()
 {
-    System::Init();
+    ovr_Initialize();
 
-    pManager = *DeviceManager::Create();
-
-    pHMD = *pManager->EnumerateDevices<HMDDevice>().CreateDevice();
-
-    if (pHMD)
+    ovrHmd     hmd = ovrHmd_Create(0);
+    ovrHmdDesc hmdDesc;
+    if (hmd)
     {
-        InfoLoaded = pHMD->GetDeviceInfo(&Info);
-
-        pSensor = *pHMD->GetSensor();
-    }
-    else
-    {
-        pSensor = *pManager->EnumerateDevices<SensorDevice>().CreateDevice();
+        ovrHmd_GetDesc(hmd, &hmdDesc);
     }
 
-    if (pSensor)
+    ovrHmd_StartSensor(hmd,
+        ovrHmdCap_Orientation |
+        ovrHmdCap_YawCorrection,
+        ovrHmdCap_Orientation);
+
+    while(1)
     {
-        FusionResult.AttachToSensor(pSensor);
-    }
-}
+        ovrSensorState ss = ovrHmd_GetSensorState(hmd, 0.0);
 
-void Clear()
-{
-    pSensor.Clear();
-    pHMD.Clear();
-    pManager.Clear();
+        if (ss.StatusFlags & (ovrStatus_OrientationTracked))
+        {
+            //ovrPosef pose = ss.Predicted.Pose; ///<@todo This seems to yield noisy results
+            ovrPosef pose = ss.Recorded.Pose;
 
-    System::Destroy();
-}
+#if 0
+            std::cout
+                << "X: " << pose.Orientation.x
+                << "Y: " << pose.Orientation.y
+                << "Z: " << pose.Orientation.z << std::endl;
+#else
+            // Use the C++ API's Quat functions to get Euler angles
+            ovrQuatf o = pose.Orientation;
+            OVR::Quatf qf(o.x, o.y, o.z, o.w);
 
-void Output()
-{
-    cout << "----- Oculus Console -----" << endl;
+            float yaw, pitch, roll;
+            qf.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
 
-    if (pHMD)
-    {
-        cout << " [x] HMD Found" << endl;
-    }
-    else
-    {
-        cout << " [ ] HMD Not Found" << endl;
-    }
-
-    if (pSensor)
-    {
-        cout << " [x] Sensor Found" << endl;
-    }
-    else
-    {
-        cout << " [ ] Sensor Not Found" << endl;
-    }
-
-    cout << "--------------------------" << endl;
-
-    if (InfoLoaded)
-    {
-        cout << " DisplayDeviceName: " << Info.DisplayDeviceName << endl;
-        cout << " ProductName: " << Info.ProductName << endl;
-        cout << " Manufacturer: " << Info.Manufacturer << endl;
-        cout << " Version: " << Info.Version << endl;
-        cout << " HResolution: " << Info.HResolution<< endl;
-        cout << " VResolution: " << Info.VResolution<< endl;
-        cout << " HScreenSize: " << Info.HScreenSize<< endl;
-        cout << " VScreenSize: " << Info.VScreenSize<< endl;
-        cout << " VScreenCenter: " << Info.VScreenCenter<< endl;
-        cout << " EyeToScreenDistance: " << Info.EyeToScreenDistance << endl;
-        cout << " LensSeparationDistance: " << Info.LensSeparationDistance << endl;
-        cout << " InterpupillaryDistance: " << Info.InterpupillaryDistance << endl;
-        cout << " DistortionK[0]: " << Info.DistortionK[0] << endl;
-        cout << " DistortionK[1]: " << Info.DistortionK[1] << endl;
-        cout << " DistortionK[2]: " << Info.DistortionK[2] << endl;
-        cout << "--------------------------" << endl;
-    }
-
-    cout << endl << " Press ENTER to continue" << endl;
-
-    cin.get();
-
-    while(pSensor)
-    {
-        Quatf quaternion = FusionResult.GetOrientation();
-
-        float yaw, pitch, roll;
-        quaternion.GetEulerAngles<Axis_Y, Axis_X, Axis_Z>(&yaw, &pitch, &roll);
-
-        cout
-            << std::setprecision(2)
-            << " Yaw " << RadToDegree(yaw)
-            << ",  Pitch " << RadToDegree(pitch)
-            << ",  Roll " << RadToDegree(roll) << endl;
+            std::cout
+                << std::setprecision(2)
+                << " Yaw " << RadToDegree(yaw)
+                << ",  Pitch " << RadToDegree(pitch)
+                << ",  Roll " << RadToDegree(roll) << std::endl;
+#endif
+        }
 
 #ifdef _WIN32
+        // Exit on input from keyboard
         Sleep(50);
         if (_kbhit()) exit(0);
 #endif
     }
-}
 
-int main()
-{
-    Init();
-    Output();
-    Clear();
+    ovr_Shutdown();
 }
