@@ -23,6 +23,17 @@ void main()
     {
         ovrHmd_GetDesc(hmd, &hmdDesc);
     }
+    else
+    {
+        ovr_Shutdown();
+        
+#ifdef _WIN32
+        std::cout << "No HMD connected." << std::endl;
+        // Exit on input from keyboard
+        getch();
+#endif
+        exit(0);
+    }
 
     ovrHmd_StartSensor(hmd,
         ovrHmdCap_Orientation |
