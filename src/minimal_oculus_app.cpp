@@ -49,11 +49,12 @@ void main()
             //ovrPosef pose = ss.Predicted.Pose; ///<@todo This seems to yield noisy results
             ovrPosef pose = ss.Recorded.Pose;
 
-#if 0
+#if 1
             std::cout
                 << "X: " << pose.Orientation.x
-                << "Y: " << pose.Orientation.y
-                << "Z: " << pose.Orientation.z << std::endl;
+                << ", Y: " << pose.Orientation.y
+                << ", Z: " << pose.Orientation.z
+                << ", W: " << pose.Orientation.w << std::endl;
 #else
             // Use the C++ API's Quat functions to get Euler angles
             ovrQuatf o = pose.Orientation;
